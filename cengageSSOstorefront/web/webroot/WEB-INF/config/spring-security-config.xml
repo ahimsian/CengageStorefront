@@ -161,8 +161,7 @@
 
 	<bean id="coreUserDetailsService" class="de.hybris.platform.spring.security.CoreUserDetailsService"  />
 
-	<bean id="guidCookieStrategy" class="com.cengage.sso.storefront.security.impl.DefaultGUIDCookieStrategy"
-	      >
+	<bean id="guidCookieStrategy" class="com.cengage.sso.storefront.security.impl.DefaultGUIDCookieStrategy">
 		<property name="cookieGenerator" ref="guidCookieGenerator" />
 	</bean>
 
@@ -172,6 +171,20 @@
 		<property name="cookieName" value="acceleratorSecureGUID" />
 		<property name="httpOnly" value="true"/>
 	</bean>
+	
+	<!-- CLSSO Cookie Management
+	<bean id="clGuidCookieStrategy" class="com.cl.sso.security.DefaultGUIDCookieStrategy">
+		<property name="cookieGenerator" ref="clGuidCookieGenerator" />
+	</bean>
+
+	<alias name="clDefaultGuidCookieGenerator" alias="clGuidCookieGenerator"/>
+	<bean id="clDefaultGuidCookieGenerator" class="com.cl.sso.security.EnhancedCookieGenerator" >
+		<property name="cookieSecure" value="true" />
+		<property name="cookieName" value="acceleratorSecureGUID" />
+		<property name="httpOnly" value="true"/>
+	</bean>
+	END -->
+	
 
 	<bean id="autoLoginStrategy" class="com.cengage.sso.storefront.security.impl.DefaultAutoLoginStrategy" >
 		<property name="authenticationManager" ref="authenticationManager" />
@@ -310,18 +323,25 @@
 	
 	<bean id="usernamePasswordAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter" scope="tenant">
 		<property name="authenticationManager" ref="clssoauthmanager" />
-		<property name="authenticationSuccessHandler" ref="authSuccessHandler" />
+		<property name="authenticationSuccessHandler" ref="loginCLAuthenticationSuccessHandler" />
 		<property name="authenticationFailureHandler" ref="failureHandler" />
 	</bean>
 	
 	<bean id="clssoAuthenticationFilter" class="com.cl.sso.CLSSOAuthenticationFilter" scope="tenant">
 		<property name="authenticationManager" ref="clssoauthmanager" /> 
-		<property name="authenticationSuccessHandler" ref="authSuccessHandler" /> 
+		<property name="authenticationSuccessHandler" ref="loginCLAuthenticationSuccessHandler" /> 
 		<property name="authenticationFailureHandler" ref="failureHandler" /> 
 		<!-- added for my-account to work... -->
+		<!-- <property name="guidCookieStrategy" ref="guidCookieStrategy"/> -->
 <!-- 				
 		<property name="rememberMeServices" ref="rememberMeServices"/>
 -->
+	</bean>
+	
+	<bean id="loginCLAuthenticationSuccessHandler" class="com.cengage.sso.storefront.security.GUIDAuthenticationSuccessHandler" >
+		<property name="authenticationSuccessHandler" ref="authSuccessHandler" />
+		<property name="guidCookieStrategy" ref="guidCookieStrategy" />
+		<aop:scoped-proxy />
 	</bean>
 	
 	<bean id="authSuccessHandler" class="com.cl.sso.StorefrontAuthenticationSuccessHandler" scope="tenant" />
