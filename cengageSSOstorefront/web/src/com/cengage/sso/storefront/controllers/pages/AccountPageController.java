@@ -76,6 +76,9 @@ import com.cengage.sso.storefront.forms.validation.AddressValidator;
 import com.cengage.sso.storefront.forms.validation.EmailValidator;
 import com.cengage.sso.storefront.forms.validation.PasswordValidator;
 import com.cengage.sso.storefront.forms.validation.ProfileValidator;
+import com.cl.sso.constants.ClssoConstants;
+import com.cl.sso.ws.CLWebService;
+import com.cl.sso.ws.impl.CLWebServiceImpl;
 
 
 /**
@@ -379,9 +382,6 @@ public class AccountPageController extends AbstractSearchPageController
 			{
 				customerFacade.changeUid(updateEmailForm.getEmail(), updateEmailForm.getPassword());
 
-				/* CLSSO Hack */
-				
-
 				GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.CONF_MESSAGES_HOLDER,
 						"text.account.profile.confirmationUpdated", null);
 
@@ -469,6 +469,15 @@ public class AccountPageController extends AbstractSearchPageController
 			try
 			{
 				customerFacade.updateProfile(customerData);
+
+				/* CLSSO Hack */
+				final String uid = currentCustomerData.getUid();
+				final CLWebService clsso = new CLWebServiceImpl();
+				final String token = clsso.getToken(ClssoConstants.PROXY_USER, ClssoConstants.PROXY_PASS).getToken();
+				clsso.modifyName(token, uid, updateProfileForm.getFirstName(), updateProfileForm.getLastName());
+				/* End */
+
+
 				GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.CONF_MESSAGES_HOLDER,
 						"text.account.profile.confirmationUpdated", null);
 				returnAction = REDIRECT_TO_PROFILE_PAGE;
